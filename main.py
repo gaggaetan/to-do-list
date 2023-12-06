@@ -8,6 +8,7 @@ def remove_Database(db_file):
     try:
         conn = sqlite3.connect(db_file)
         conn.execute("DROP TABLE to_do_list")
+        conn.execute("DROP TABLE personnes")
         print(sqlite3.version)
     except Error as e:
         print(e)
@@ -25,6 +26,11 @@ def create_Database(db_file):
                      "to_do TEXT NOT NULL,"
                      "pers_id  INTEGER NOT NULL"
                      ");")
+        conn.execute("CREATE TABLE personnes ("
+                     "pers_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "personnes TEXT NOT NULL,"
+                     "FOREIGN KEY (pers_id) REFERENCES to_do_list(pers_id)"
+                     ");")
         print(sqlite3.version)
     except Error as e:
         print(e)
@@ -40,12 +46,15 @@ def create_connection(db_file):
 
         cur = conn.cursor()
 
-        cur.execute("INSERT INTO to_do_list(to_do,pers_id) VALUES('test',1)")
+        cur.execute("INSERT INTO personnes(personnes) VALUES('damien3')")
+        #recuperer le dernier ID
+        person_id = cur.lastrowid
+
+        cur.execute(f"INSERT INTO to_do_list(to_do,pers_id) VALUES('test', {person_id})")
         conn.commit()
 
-        cur.execute("SELECT * FROM to_do_list")
+        cur.execute("SELECT t1.id, t2.pers_id, t2.personnes FROM to_do_list as t1 join personnes as t2 on t1.pers_id = t2.pers_id")
         rows = cur.fetchall()
-
         for row in rows:
             print(row)
 
@@ -83,9 +92,10 @@ def execute_sql (db_file, query):
 if __name__ == '__main__':
     #remove_Database(r"DB\pythonsqlite.db")
     #create_Database(r"DB\pythonsqlite.db")
-    #create_connection(r"DB\pythonsqlite.db")
-    execute_sql(r"DB\pythonsqlite.db", "INSERT INTO to_do_list(to_do,pers_id) VALUES('test',1)")
 
+    create_connection(r"DB\pythonsqlite.db")
+    #execute_sql(r"DB\pythonsqlite.db", "INSERT INTO to_do_list(to_do,pers_id) VALUES('test',1)")
+    """
     socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     socket.bind(('', 15555))
 
@@ -106,7 +116,7 @@ if __name__ == '__main__':
 
     print("close")
     client.close()
-    socket.close()
+    socket.close()"""
 
 
 
