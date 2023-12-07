@@ -10,15 +10,11 @@ class Client(cmd.Cmd) :
     prompt = ">>"
 
     # ------------- initalisation de l'interpreteur -------------
-    def __init__(self):
+    def __init__(self, port_id_to_update):
         super().__init__()
         self.client_name = input("Quel votre nom & prenom :")
+        self.port_id_to_update = int(port_id_to_update)
 
-        # clear cmd
-        if platform.system() == 'Windows':
-            subprocess.run("cls", shell=True)
-        else:
-            subprocess.run("clear", shell=True)
 
         print(f"Bonjour {self.client_name},\n"
               f"Vous voila connecter au nom de '{self.client_name}' dans la base de données de to_do_list\n"
@@ -29,16 +25,19 @@ class Client(cmd.Cmd) :
               f"    - new_client          => pour avoir un nouveau client.\n"
               f"    - end_db              => pour arreter la database.\n")
 
+        #écouter la db pour savoir q'il ya une un changement
+        self.listen_to_change_in_db
+
         #création de votre personne dans la base de données
         self.pers_id = self.create_personne
 
-        #afficher la to do list acutelle
-        self.show_to_do_list
+
         pass
 
-    @property
+
     def emptyline(self):
         print("Veuillez introduire quelque chose :")
+        return None
     # ------------- conectiion/déconection -------------
     @property
     def create_personne(self):
@@ -79,13 +78,34 @@ class Client(cmd.Cmd) :
 
 
 
+    @property
+    def listen_to_change_in_db(self):
+        def listen_to_change_in_db_thread():
+            import socket
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_socket.bind(('', self.port_id_to_update))
+            server_socket.listen()
+
+            while True:
+                client, address = server_socket.accept()
+
+                response = client.recv(100000).decode()
+
+                if response == "update":
+                    self.show_to_do_list
+                if response == "end_db":
+                    server_socket.close
+                    print("the db has shut down")
+
+        thread = threading.Thread(target=listen_to_change_in_db_thread, daemon=True)
+        thread.start()
+
     # ------------- query -------------
     def do_new_task(self, arg):
         def do_new_task_thread(arg):
             self.open_connection
             self.socket.send(f"INSERT INTO to_do_list(to_do, pers_id) VALUES('{arg}', '{self.pers_id}')".encode())
             self.end_connection
-            self.show_to_do_list
 
         thread = threading.Thread(target=do_new_task_thread(arg))
         thread.start()
@@ -97,7 +117,6 @@ class Client(cmd.Cmd) :
             self.open_connection
             self.socket.send(f"DELETE FROM to_do_list as t1 WHERE t1.id = {arg}".encode())
             self.end_connection
-            self.show_to_do_list
         thread = threading.Thread(target=do_remove_thread(arg))
         thread.start()
 

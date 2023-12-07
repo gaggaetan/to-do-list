@@ -7,6 +7,7 @@ import os
 class To_do_list_DB:
     def __init__(self, db_file: str):
         self._db_file = db_file
+        self.nbr_client = 0
 
     def delete_all_table_in_db(self):
         conn = None
@@ -123,3 +124,42 @@ class To_do_list_DB:
         finally:
             if conn:
                 conn.close()
+
+    def new_clients(self, nbr_new_clients):
+        for i in range(int(nbr_new_clients)):
+            # Chemin absolu vers le script client.py
+            client_script_path = os.path.abspath("client.py")
+
+            # Lancer un nouveau terminal avec le script client.py
+            subprocess.run(["start", "cmd", "/k", "python", client_script_path] + [f"{15600 + self.nbr_client}"], shell=True)
+            self.nbr_client += 1
+
+    def update_client_new_task(self):
+        import socket
+
+        for i in range(self.nbr_client) :
+            try:
+                hote = "localhost"
+                port = 15600 + i
+
+                server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                server_socket.connect((hote, port))
+                server_socket.send(f"update".encode())
+                server_socket.close()
+            except :
+                pass
+
+    def update_client_end_db(self):
+        import socket
+
+        for i in range(self.nbr_client):
+            try:
+                hote = "localhost"
+                port = 15600 + i
+
+                server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                server_socket.connect((hote, port))
+                server_socket.send(f"end_db".encode())
+                server_socket.close()
+            except :
+                pass
