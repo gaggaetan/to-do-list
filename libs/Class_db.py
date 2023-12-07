@@ -1,8 +1,7 @@
 import sqlite3
 from sqlite3 import Error
-from libs.Class_client import *
-import threading
 import os
+import subprocess
 
 class To_do_list_DB:
     def __init__(self, db_file: str):
@@ -46,7 +45,7 @@ class To_do_list_DB:
             print(e)
         finally:
             if conn:
-                conn.close()
+                  conn.close()
 
     def reset_db(self):
         # ajouter des try except

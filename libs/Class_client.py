@@ -1,8 +1,5 @@
 import cmd
 import socket
-import subprocess
-import os
-import platform
 import threading
 
 
@@ -30,8 +27,6 @@ class Client(cmd.Cmd) :
 
         #création de votre personne dans la base de données
         self.pers_id = self.create_personne
-
-
         pass
 
 
@@ -61,6 +56,7 @@ class Client(cmd.Cmd) :
     def end_connection (self):
         #print("Connection Close")
         self.socket.close()
+
 
     @property
     def show_to_do_list (self):
@@ -107,7 +103,7 @@ class Client(cmd.Cmd) :
             self.socket.send(f"INSERT INTO to_do_list(to_do, pers_id) VALUES('{arg}', '{self.pers_id}')".encode())
             self.end_connection
 
-        thread = threading.Thread(target=do_new_task_thread(arg))
+        thread = threading.Thread(target=do_new_task_thread, args=(arg,))
         thread.start()
 
 
@@ -117,7 +113,7 @@ class Client(cmd.Cmd) :
             self.open_connection
             self.socket.send(f"DELETE FROM to_do_list as t1 WHERE t1.id = {arg}".encode())
             self.end_connection
-        thread = threading.Thread(target=do_remove_thread(arg))
+        thread = threading.Thread(target=do_remove_thread, args=(arg,))
         thread.start()
 
     def do_stop (self, arg):
@@ -130,17 +126,18 @@ class Client(cmd.Cmd) :
             self.open_connection
             self.socket.send(f"stop SQLite database".encode())
             self.end_connection
-        thread = threading.Thread(target=do_end_db_thread())
+        thread = threading.Thread(target=do_end_db_thread)
         thread.start()
 
 
 
     def do_new_client(self, arg):
-        # Chemin absolu vers le script client_script.py
-        client_script_path = os.path.abspath("client.py")
-
-        # Lancer un nouveau terminal avec le script client_script.py
-        subprocess.run(["start", "cmd", "/k", "python", client_script_path], shell=True)
+        def do_new_client_thread():
+            self.open_connection
+            self.socket.send(f"NEW_CLIENT".encode())
+            self.end_connection
+        thread = threading.Thread(target=do_new_client_thread)
+        thread.start()
 
 
 
