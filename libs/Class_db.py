@@ -1,6 +1,8 @@
 import sqlite3
 from sqlite3 import Error
-
+from libs.Class_client import *
+import threading
+import os
 
 class To_do_list_DB:
     def __init__(self, db_file: str):
@@ -75,7 +77,6 @@ class To_do_list_DB:
                 pass
 
             conn.commit()
-
         except Error as e:
             print(e)
         finally:
@@ -95,6 +96,27 @@ class To_do_list_DB:
 
             # return the result
             return cur.fetchall()
+
+        except Error as e:
+            print(e)
+        finally:
+            if conn:
+                conn.close()
+
+
+    def execute_sql_delete(self, query):
+        print(query)
+        conn = None
+        try:
+            # connect to the server
+            conn = sqlite3.connect(self._db_file)
+
+            cur = conn.cursor()
+
+            # execute the query
+            cur.execute(query)
+            conn.commit()
+
 
         except Error as e:
             print(e)
