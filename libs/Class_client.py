@@ -3,7 +3,6 @@ import socket
 import threading
 import subprocess
 import platform
-import time
 
 from colorama import Fore, Style, init
 import re
@@ -12,6 +11,7 @@ import re
 L_bright = lambda value: f"{Style.BRIGHT}{value}{Style.NORMAL}"
 L_cyan = lambda value: f"{Fore.CYAN}{value}{Style.RESET_ALL}"
 L_red = lambda value: f"{Fore.RED}{value}{Style.RESET_ALL}"
+L_underline = lambda value: f"\033[4m{value}\033[0m"
 
 
 #reset/initialiser colerma
@@ -124,7 +124,7 @@ class Client(cmd.Cmd):
               f"    - {L_cyan('end_db')}              => pour arreter la database.\n")
 
         #print les taches qu ela db contient suite à la réponse de la requete
-        print("Votre liste de taches")
+        print(L_underline("Votre liste de taches :"))
         response_str = self.socket.recv(100000).decode()
         response_tab = eval(response_str)
         for i in range(len(response_tab)):
