@@ -1,16 +1,24 @@
 import platform
 import socket
+import re
 from libs.Class_db import *
 
 if __name__ == '__main__':
     #initialise le nbr de client besoin
     nbr_client: int = input("Combien de client avez vous besoin au début : ")
 
+    #regarde si le nombre de client est bien un nombre et non autre chose
+    nbr_client_verification_number = re.search(r'\b\d+\b', nbr_client)
+    while nbr_client_verification_number is None :
+        nbr_client: int = input("Veuillez introduire un chiffre : ")
+        nbr_client_verification_number = re.search(r'\b\d+\b', nbr_client)
+
     #clear cmd
     if platform.system() == 'Windows':
         subprocess.run("cls", shell=True)
     else:
         subprocess.run("clear", shell=True)
+
 
     #initialise la db et les clients
     db = To_do_list_DB("DB\pythonsqlite.db")

@@ -1,7 +1,21 @@
 import cmd
 import socket
 import threading
+import subprocess
+import platform
+import time
 
+from colorama import Fore, Style, init
+import re
+
+#lambda pour se faciler la tache des colerma
+L_bright = lambda value: f"{Style.BRIGHT}{value}{Style.NORMAL}"
+L_cyan = lambda value: f"{Fore.CYAN}{value}{Style.RESET_ALL}"
+L_red = lambda value: f"{Fore.RED}{value}{Style.RESET_ALL}"
+
+
+#reset/initialiser colerma
+init(autoreset=True)
 
 class Client(cmd.Cmd):
     """ Class pour la DB """
@@ -13,22 +27,33 @@ class Client(cmd.Cmd):
         """ initialise le client dans la DB et le met à l'écoute en cas de changement dans la DB """
 
         super().__init__()
+        self.pers_id = None
 
         #récupere le nom du client
-        self.pers_id = None
         self.client_name = input("Quel votre nom & prenom :")
+
+        #dit si il y a un caractere spécial dans le nom (none = pas de caractères spécial)
+        name_validation_spécial_characters = re.search(r'["\'!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]', self.client_name)
+
+
+        #met dans un tableau les liste de caractrers ou il y a : un ou plusieurs caractères puis un espace puis un ou plusieurs caractères
+        name_validation_one_space_at_least = re.findall(r'\w+\s\w+', self.client_name)
+        while name_validation_spécial_characters is not None or len(name_validation_one_space_at_least) == 0  :
+
+            #afficher les erreurs de nom
+            if name_validation_spécial_characters is not None :
+                print(L_red('Veuillez écrire votre nom et prenom sans aucun caractère spéciaux !'))
+            if len(name_validation_one_space_at_least) == 0 :
+                print(L_red('Veuillez écrire votre nom et prenom avec un espace entre les deux !'))
+
+            self.client_name = input("Veuillez réintroduite votre nom & prenom :")
+            name_validation_spécial_characters = re.search(r'["\'!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]', self.client_name)
+            name_validation_one_space_at_least = re.findall(r'\w+\s\w+', self.client_name)
+
 
         #récupere le numéro du port qui va devoir écouter pour savoir s'il y a une changemt fait par la DB, et il envois donc un socket
         self.port_id_to_update = int(port_id_to_update)
 
-        print(f"Bonjour {self.client_name},\n"
-              f"Vous voila connecter au nom de '{self.client_name}' dans la base de données de to_do_list\n"
-              f"Vous pouvre executer ces commandes pour interagir avec la base de donnes :\n"
-              f"    - new_task arg1       => pour ajouter une nouvelle tache.\n"
-              f"    - remove arg1         => pour elever une tache avec son id\n"
-              f"    - stop                => pour arreter le programme.\n"
-              f"    - new_client          => pour avoir un nouveau client.\n"
-              f"    - end_db              => pour arreter la database.\n")
 
         #écouter la db pour savoir q'il ya une un changement avec le numero de port
         self.listen_to_change_in_db
@@ -78,7 +103,6 @@ class Client(cmd.Cmd):
         #ferme la connection de socket
         self.end_connection
 
-
     @property
     def show_to_do_list(self):
         """ Crée le client dans le DB """
@@ -89,6 +113,16 @@ class Client(cmd.Cmd):
         #envois la requete sql
         self.socket.send("SELECT t1.to_do, t2.personnes, t1.id FROM to_do_list as t1 join personnes as t2 on t1.pers_id = t2.pers_id".encode())
 
+        self.clear_screen
+
+        print(f"Vous etes bien connecter à la base de données 'To-do list',"
+              f"vous pouvez executer ces commandes pour interagir avec la base de donnes :\n"
+              f"    - {L_cyan('new_task arg1')}       => pour ajouter une nouvelle tache.\n"
+              f"    - {L_cyan('remove arg1')}         => pour elever une tache avec son id\n"
+              f"    - {L_cyan('stop')}                => pour arreter le programme.\n"
+              f"    - {L_cyan('new_client')}          => pour avoir un nouveau client.\n"
+              f"    - {L_cyan('end_db')}              => pour arreter la database.\n")
+
         #print les taches qu ela db contient suite à la réponse de la requete
         print("Votre liste de taches")
         response_str = self.socket.recv(100000).decode()
@@ -98,6 +132,15 @@ class Client(cmd.Cmd):
         
         #ferme la connection du socket
         self.end_connection
+
+    @property
+    def clear_screen(self):
+        """ Clear the cmd screen"""
+        # clear cmd
+        if platform.system() == 'Windows':
+            subprocess.run("cls", shell=True)
+        else:
+            subprocess.run("clear", shell=True)
 
     # ------------- écoute le changement dans la DB -------------
     @property
@@ -148,9 +191,11 @@ class Client(cmd.Cmd):
             #ferme la connection du socket
             self.end_connection
 
-        #utilise un thread pour que le client puisse continuer à interagir avec le porgramme sans devoir attendre la fin de la requete
-        thread = threading.Thread(target=do_new_task_thread, args=(arg,))
-        thread.start()
+        if re.search(r"[']", arg) is None :
+            #utilise un thread pour que le client puisse continuer à interagir avec le porgramme sans devoir attendre la fin de la requete
+            thread = threading.Thread(target=do_new_task_thread, args=(arg,), daemon=True)
+            thread.start()
+        print(L_red('Veuillez ne pas utiliser de \' dans votre commande.'))
 
     def do_remove(self, arg):
         """ Crée le thread qui : supprime une tache de la DB à partir de son id """
@@ -166,10 +211,12 @@ class Client(cmd.Cmd):
             #ferme la connection du socket
             self.end_connection
 
+        if re.search(r"[']", arg) is None :
+            # utilise un thread pour que le client puisse continuer à interagir avec le porgramme sans devoir attendre la fin de la requete
+            thread = threading.Thread(target=do_remove_thread, args=(arg,), daemon=True)
+            thread.start()
 
-        # utilise un thread pour que le client puisse continuer à interagir avec le porgramme sans devoir attendre la fin de la requete
-        thread = threading.Thread(target=do_remove_thread, args=(arg,))
-        thread.start()
+        print(L_red('Veuillez ne pas utiliser de \' dans votre commande.'))
 
 
     def do_end_db(self, arg):
@@ -188,9 +235,10 @@ class Client(cmd.Cmd):
             #ferme la connection du socket
             self.end_connection
 
-        #utilise un thread pour que le client puisse continuer à interagir avec le porgramme sans devoir attendre la fin de la requete
-        thread = threading.Thread(target=do_end_db_thread)
+        # utilise un thread pour que le client puisse continuer à interagir avec le porgramme sans devoir attendre la fin de la requete
+        thread = threading.Thread(target=do_end_db_thread, daemon=True)
         thread.start()
+
 
     def do_stop(self, arg):
         """ Ferme le porgrame interactif du client (en retournant True)"""
@@ -214,10 +262,11 @@ class Client(cmd.Cmd):
             self.end_connection
 
         # utilise un thread pour que le client puisse continuer à interagir avec le porgramme sans devoir attendre la fin de la requete
-        thread = threading.Thread(target=do_new_client_thread)
+        thread = threading.Thread(target=do_new_client_thread, daemon=True)
         thread.start()
 
 
+
 if __name__ == '__main__':
-    interpreteur = Client()
+    interpreteur = Client(15600)
     interpreteur.cmdloop()

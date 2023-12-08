@@ -153,11 +153,11 @@ class To_do_list_DB:
     def update_client_new_task(self):
         """ Envois une requete à tout les clients pour prévenir  qu'un nouvelle tache à été ajouter à la DB """
 
-        def update_client_new_task_thread():
-            import socket
+        import socket
 
-            #envois une requete sur tout les port ou les clients sont à l'écoute
-            for i in range(self.nbr_client):
+        #envois une requete sur tout les port ou les clients sont à l'écoute
+        for i in range(self.nbr_client):
+            def update_client_new_task_thread():
                 try:
                     hote = "localhost"
                     port = 15600 + i
@@ -169,29 +169,32 @@ class To_do_list_DB:
                 except:
                     pass
 
-        #utilise un thread pour éviter que le porgramme pricipale doivent attendre la fin des socket => et peut donc causer des bug
-        thread = threading.Thread(target=update_client_new_task_thread)
-        thread.start()
+            # utilise un thread pour éviter que le porgramme pricipale doivent attendre la fin des socket => et peut donc causer des bug
+            thread = threading.Thread(target=update_client_new_task_thread, daemon=True)
+            thread.start()
+
+
 
     def update_client_end_db(self):
         """ Envois une requete à tout les clients pour prévenir que la DB à été arrêter """
 
-        def update_client_end_db_thread():
-            import socket
 
-            #envois une requete sur tout les port ou les clients sont à l'écoute
-            for i in range(self.nbr_client):
+        import socket
+
+        # envois une requete sur tout les port ou les clients sont à l'écoute
+        for i in range(self.nbr_client):
+            def update_client_end_db_thread():
                 try:
                     hote = "localhost"
                     port = 15600 + i
 
                     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     server_socket.connect((hote, port))
-                    server_socket.send(f"end_db".encode())
+                    server_socket.send(f"update".encode())
                     server_socket.close()
                 except:
                     pass
 
-        #utilise un thread pour éviter que le porgramme pricipale doivent attendre la fin des socket => et peut donc causer des bug
-        thread = threading.Thread(target=update_client_end_db_thread)
-        thread.start()
+            # utilise un thread pour éviter que le porgramme pricipale doivent attendre la fin des socket => et peut donc causer des bug
+            thread = threading.Thread(target=update_client_end_db_thread, daemon=True)
+            thread.start()
