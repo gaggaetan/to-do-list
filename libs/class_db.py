@@ -1,10 +1,9 @@
+# pylint: disable=C0103
 """
 Ce fichier contient la class ToDoListDB.
 
-Elle permet de de lancer toutes les action que la DB doit faire,
+Elle permet de de lancer toutes les actions que la DB doit faire,
 de la création à la mise à jour de celle ci
-
-# pylint: disable=C0103
 """
 
 
@@ -118,7 +117,7 @@ class ToDoListDB:
 
     def execute_sql_select(self, query):
         """
-        Execute la requete SQL SELECT dans la DB et retourne le résultat du select dans la DB
+        Execute la requete SQL SELECT dans la DB et retourne le résultat du select de la DB
         """
 
         conn = None
@@ -166,7 +165,7 @@ class ToDoListDB:
                 #ferme la connection avec la DB
                 conn.close()
 
-    def new_clients(self, nbr_new_clients):
+    def new_clients(self, nbr_new_clients = 1):
         """
         Crée un certain nombre de nouveau client dans des nouvelle ligne de commande (cmd)
         """
@@ -211,7 +210,7 @@ class ToDoListDB:
 
     def update_client_end_db(self):
         """
-        Envois une requete à tout les clients pour prévenir que la DB à été arrêter
+        Envois une requete à tous les clients pour prévenir que la DB à été arrêter
         """
 
         def update_client_end_db_thread(index):

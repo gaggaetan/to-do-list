@@ -1,11 +1,9 @@
+# pylint: disable=C0103
 """
 Ce fichier contient la class client.
 
 Elle permet de faire toutes les actions qu'un client doit s'avoir faire
-
-# pylint: disable=C0103
 """
-
 
 import cmd
 import socket
@@ -58,7 +56,7 @@ class Client(cmd.Cmd):
     # ------------- initalisation de l'interpreteur -------------
     def __init__(self, port_id_to_update):
         """
-        initialise le client dans la DB et le met à l'écoute en cas de changement
+        Initialise le client dans la DB et le met à l'écoute en cas de changement
         dans la DB
         """
 
@@ -69,13 +67,13 @@ class Client(cmd.Cmd):
         #récupere le nom du client
         self.client_name = input("Quel votre nom & prenom :")
 
-        #dit si il y a un caractere spécial dans le nom (none = pas de caractères spécial)
+        #dit si il y a un caractère spécial dans le nom (none = pas de caractères spécial)
         name_validation_special_characters = re.search(r'["\'!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]',
                                                        self.client_name)
 
 
         #met dans un tableau les liste de caractrers ou il y a :
-        #un ou plusieurs caractères puis un espace puis un ou plusieurs caractères
+        # un ou plusieurs caractères puis un espace puis un ou plusieurs caractères
         name_validation_one_space_at_least = re.findall(r'\w+\s\w+', self.client_name)
         while (name_validation_special_characters is not None
                or len(name_validation_one_space_at_least) == 0)  :
@@ -93,9 +91,8 @@ class Client(cmd.Cmd):
 
 
         #Récupere le numéro du port qui va devoir écouter pour savoir s'il y a une changemt
-        #fait par la DB, et il envois donc un socket
+        # fait par la DB, et il envois donc un socket
         self.port_id_to_update = int(port_id_to_update)
-
 
         #écouter la db pour savoir q'il ya une un changement avec le numero de port
         self.listen_to_change_in_db()
@@ -152,7 +149,7 @@ class Client(cmd.Cmd):
 
     def show_to_do_list(self):
         """
-        Crée le client dans le DB
+        Affiche la to-do list de la DB sur le client
         """
 
         #ouvre la connection de socket
@@ -200,7 +197,8 @@ class Client(cmd.Cmd):
         """
 
         def listen_to_change_in_db_thread():
-            """ Thread qui : écoute le port sur lequel la base de données pourrait envoyer un signal
+            """
+            Thread qui : écoute le port sur lequel la base de données pourrait envoyer un signal
             indiquant qu'il y a des changements de son côté
             """
 
@@ -233,12 +231,12 @@ class Client(cmd.Cmd):
 
     def do_new_task(self, arg): # pylint: disable=unused-argument
         """
-        Crée le thread qui : envois une nouvelle taches que la DB doit rajouter
+        Crée le thread qui : envoit une nouvelle taches que la DB doit rajouter
         """
 
         def do_new_task_thread(arg_thread):
             """
-            Thread qui : envois une nouvelle taches que la DB doit rajouter
+            Thread qui : envoit une nouvelle taches que la DB doit rajouter
             """
             #ouvre la connection de socket
             self.open_connection()
@@ -254,7 +252,8 @@ class Client(cmd.Cmd):
             # sans devoir attendre la fin de la requete
             thread = threading.Thread(target=do_new_task_thread, args=(arg,), daemon=True)
             thread.start()
-        print(l_red('Veuillez ne pas utiliser de \' dans votre commande.'))
+        else :
+            print(l_red('Veuillez ne pas utiliser de \' dans votre commande !'))
 
     def do_remove(self, arg): # pylint: disable=unused-argument
         """
@@ -279,8 +278,8 @@ class Client(cmd.Cmd):
             # sans devoir attendre la fin de la requete
             thread = threading.Thread(target=do_remove_thread, args=(arg,), daemon=True)
             thread.start()
-
-        print(l_red('Veuillez ne pas utiliser de \' dans votre commande.'))
+        else :
+            print(l_red('Veuillez ne pas utiliser de \' dans votre commande !'))
 
 
     def do_end_db(self, arg): # pylint: disable=unused-argument
@@ -319,12 +318,12 @@ class Client(cmd.Cmd):
 
     def do_new_client(self, arg): # pylint: disable=unused-argument
         """
-        Crée le thread qui : envois un socket à la db demandantde créer un nouveau client
+        Crée le thread qui : envoit un socket à la db demandantde créer un nouveau client
         """
 
         def do_new_client_thread():
             """
-            Thread qui : envois un socket à la db demandantde créer un nouveau client
+            Thread qui : envoit un socket à la db demandantde créer un nouveau client
             """
 
             #ouvre la connection de socket

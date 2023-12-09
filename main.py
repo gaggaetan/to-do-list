@@ -12,10 +12,10 @@ import subprocess
 from libs.class_db import ToDoListDB
 
 if __name__ == '__main__':
-    #initialise le nbr de client besoin
+    #initialise le nbr de clients besoin
     nbr_client: int = input("Combien de clients avez vous besoin au début : ")
 
-    #regarde si le nombre de client est bien un nombre et non autre chose
+    #regarde si le nombre de clients est bien un nombre et non autre chose
     nbr_client_verification_number = re.search(r'\b\d+\b', nbr_client)
     while nbr_client_verification_number is None :
         nbr_client: int = input("Veuillez introduire un nombre : ")
@@ -32,12 +32,12 @@ if __name__ == '__main__':
     db = ToDoListDB(r"DB\pythonsqlite.db")
     db.new_clients(nbr_client)
 
-    #initialise l'écoute des client
+    #initialise l'écoute des clients
     socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     socket.bind(('', 15555))
     socket.listen()
 
-    #écoute le port sans fin
+    #écoute le port 15555 sans fin
     while True:
         client, address = socket.accept()
         print(f"{address} est connecté")
@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
         #nouveau client
         elif response.split(" ")[0] == "NEW_CLIENT":
-            db.new_clients(1)
+            db.new_clients() #crée un client par défaut
             db.update_client_new_task()
 
         #suprimer quelque chose de la db
@@ -73,7 +73,7 @@ if __name__ == '__main__':
             db.execute_sql_delete(response)
             db.update_client_new_task()
 
-        #pas une requete connue
+        #si ce n'est pas une requete connue
         else:
             print(f"Une requete SQL à été fait avec autre chose que INSERT/SELECT/DELETE, "
                   f"la voici :\n{response}")
