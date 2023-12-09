@@ -9,28 +9,42 @@ import socket
 import threading
 import subprocess
 import platform
-
-from colorama import Fore, Style, init
 import re
 
+from colorama import Fore, Style, init
+
+
 #lambda pour se faciler la tache des colerma
-L_bright = lambda value: f"{Style.BRIGHT}{value}{Style.NORMAL}"
-L_cyan = lambda value: f"{Fore.CYAN}{value}{Style.RESET_ALL}"
-L_red = lambda value: f"{Fore.RED}{value}{Style.RESET_ALL}"
-L_underline = lambda value: f"\033[4m{value}\033[0m"
+def L_bright(value):
+    return f"{Style.BRIGHT}{value}{Style.NORMAL}"
+
+def L_cyan(value):
+    return f"{Fore.CYAN}{value}{Style.RESET_ALL}"
+
+def L_red(value):
+    return f"{Fore.RED}{value}{Style.RESET_ALL}"
+
+def L_underline(value):
+    return f"\033[4m{value}\033[0m"
+
 
 
 #reset/initialiser colerma
 init(autoreset=True)
 
 class Client(cmd.Cmd):
-    """ Class pour la DB """
+    """
+    Class pour la DB
+    """
 
     prompt = ">>"
 
     # ------------- initalisation de l'interpreteur -------------
     def __init__(self, port_id_to_update):
-        """ initialise le client dans la DB et le met à l'écoute en cas de changement dans la DB """
+        """
+        initialise le client dans la DB et le met à l'écoute en cas de changement
+        dans la DB
+        """
 
         super().__init__()
         self.pers_id = None
@@ -39,25 +53,30 @@ class Client(cmd.Cmd):
         self.client_name = input("Quel votre nom & prenom :")
 
         #dit si il y a un caractere spécial dans le nom (none = pas de caractères spécial)
-        name_validation_spécial_characters = re.search(r'["\'!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]', self.client_name)
+        name_validation_special_characters = re.search(r'["\'!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]',
+                                                       self.client_name)
 
 
-        #met dans un tableau les liste de caractrers ou il y a : un ou plusieurs caractères puis un espace puis un ou plusieurs caractères
+        #met dans un tableau les liste de caractrers ou il y a :
+        #un ou plusieurs caractères puis un espace puis un ou plusieurs caractères
         name_validation_one_space_at_least = re.findall(r'\w+\s\w+', self.client_name)
-        while name_validation_spécial_characters is not None or len(name_validation_one_space_at_least) == 0  :
+        while (name_validation_special_characters is not None
+               or len(name_validation_one_space_at_least) == 0)  :
 
             #afficher les erreurs de nom
-            if name_validation_spécial_characters is not None :
+            if name_validation_special_characters is not None :
                 print(L_red('Veuillez écrire votre nom et prenom sans aucun caractère spéciaux !'))
             if len(name_validation_one_space_at_least) == 0 :
                 print(L_red('Veuillez écrire votre nom et prenom avec un espace entre les deux !'))
 
             self.client_name = input("Veuillez réintroduite votre nom & prenom :")
-            name_validation_spécial_characters = re.search(r'["\'!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]', self.client_name)
+            name_validation_special_characters = re.search(r'["\'!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]',
+                                                           self.client_name)
             name_validation_one_space_at_least = re.findall(r'\w+\s\w+', self.client_name)
 
 
-        #récupere le numéro du port qui va devoir écouter pour savoir s'il y a une changemt fait par la DB, et il envois donc un socket
+        #Récupere le numéro du port qui va devoir écouter pour savoir s'il y a une changemt
+        #fait par la DB, et il envois donc un socket
         self.port_id_to_update = int(port_id_to_update)
 
 
@@ -68,7 +87,9 @@ class Client(cmd.Cmd):
         self.create_client
 
     def emptyline(self):
-        """ Dit ce qu'il se passe si le client introduit rien dans son interpreteur """
+        """
+        Dit ce qu'il se passe si le client introduit rien dans son interpreteur
+        """
 
         print("Veuillez introduire quelque chose :")
         return None
@@ -77,7 +98,9 @@ class Client(cmd.Cmd):
 
     @property
     def open_connection(self):
-        """ Initialise la connection vers le main """
+        """
+        Initialise la connection vers le main
+        """
 
         hote = "localhost"
         port = 15555
@@ -88,14 +111,18 @@ class Client(cmd.Cmd):
 
     @property
     def end_connection(self):
-        """ Ferme la connection vers le main """
+        """
+        Ferme la connection vers le main
+        """
 
         self.socket.close()
 
     # ------------- utilities -------------
     @property
     def create_client(self):
-        """ Crée le client dans le DB """
+        """
+        Crée le client dans le DB
+        """
         
         #ouvre la connection de socket
         self.open_connection
@@ -111,18 +138,21 @@ class Client(cmd.Cmd):
 
     @property
     def show_to_do_list(self):
-        """ Crée le client dans le DB """
+        """
+        Crée le client dans le DB
+        """
 
         #ouvre la connection de socket
         self.open_connection
 
         #envois la requete sql
-        self.socket.send("SELECT t1.to_do, t2.personnes, t1.id FROM to_do_list as t1 join personnes as t2 on t1.pers_id = t2.pers_id".encode())
+        self.socket.send("SELECT t1.to_do, t2.personnes, t1.id FROM to_do_list as t1 join"
+                         " personnes as t2 on t1.pers_id = t2.pers_id".encode())
 
         self.clear_screen
 
-        print(f"Vous etes bien connecter à la base de données 'To-do list',"
-              f"vous pouvez executer ces commandes pour interagir avec la base de donnes :\n"
+        print("Vous etes bien connecter à la base de données 'To-do list',"
+              "vous pouvez executer ces commandes pour interagir avec la base de donnes :\n"
               f"    - {L_cyan('new_task arg1')}       => pour ajouter une nouvelle tache.\n"
               f"    - {L_cyan('remove arg1')}         => pour elever une tache avec son id\n"
               f"    - {L_cyan('stop')}                => pour arreter le programme.\n"
@@ -134,27 +164,35 @@ class Client(cmd.Cmd):
         response_str = self.socket.recv(100000).decode()
         response_tab = eval(response_str)
         for i in range(len(response_tab)):
-            print(f"{i + 1}) {response_tab[i][0]} BY {response_tab[i][1]} (task id = {response_tab[i][2]})")
+            print(f"{i + 1}) {response_tab[i][0]} BY {response_tab[i][1]} "
+                  f"(task id = {response_tab[i][2]})")
         
         #ferme la connection du socket
         self.end_connection
 
     @property
     def clear_screen(self):
-        """ Clear the cmd screen"""
+        """
+        Clear the cmd screen
+        """
         # clear cmd
         if platform.system() == 'Windows':
-            subprocess.run("cls", shell=True)
+            subprocess.run("cls", shell=True, check=True)
         else:
-            subprocess.run("clear", shell=True)
+            subprocess.run("clear", shell=True, check=True)
 
     # ------------- écoute le changement dans la DB -------------
     @property
     def listen_to_change_in_db(self):
-        """ Crée le thread qui : écoute le port sur lequel la base de données pourrait envoyer un signal indiquant qu'il y a des changements de son côté """
+        """
+        Crée le thread qui : écoute le port sur lequel la base de données pourrait envoyer un signal
+        indiquant qu'il y a des changements de son côté
+        """
 
         def listen_to_change_in_db_thread():
-            """ Thread qui : écoute le port sur lequel la base de données pourrait envoyer un signal indiquant qu'il y a des changements de son côté """
+            """ Thread qui : écoute le port sur lequel la base de données pourrait envoyer un signal
+            indiquant qu'il y a des changements de son côté
+            """
 
             #initialise l'écoute du serveur
             server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -176,37 +214,48 @@ class Client(cmd.Cmd):
                     server_socket.close
                     print("the db has shut down")
 
-        #utilise un thread pour éviter que le client ne puisse plus interagir avec le porgramme interactif pricipal (car quand on écoute sur un port on ne peut plus rien faire d'autre du au while)
+        #utilise un thread pour éviter que le client ne puisse plus interagir avec
+        #le porgramme interactif pricipal (car quand on écoute sur un port on ne peut plus rien faire d'autre du au while)
         thread = threading.Thread(target=listen_to_change_in_db_thread, daemon=True)
         thread.start()
 
     # ------------- methodes que le client peut lancer par le porgramme interactif -------------
 
-    def do_new_task(self, arg):
-        """ Crée le thread qui : envois une nouvelle taches que la DB doit rajouter """
+    def do_new_task(self, arg): # pylint: disable=unused-argument
+        """
+        Crée le thread qui : envois une nouvelle taches que la DB doit rajouter
+        """
 
         def do_new_task_thread(arg_thread):
-            """ Thread qui : envois une nouvelle taches que la DB doit rajouter """
+            """
+            Thread qui : envois une nouvelle taches que la DB doit rajouter
+            """
             
             #ouvre la connection de socket
             self.open_connection
 
             #envois la requete sql
-            self.socket.send(f"INSERT INTO to_do_list(to_do, pers_id) VALUES('{arg_thread}', '{self.pers_id}')".encode())
+            self.socket.send(f"INSERT INTO to_do_list(to_do, pers_id) VALUES('{arg_thread}',"
+                             f"'{self.pers_id}')".encode())
 
             #ferme la connection du socket
             self.end_connection
 
         if re.search(r"[']", arg) is None :
-            #utilise un thread pour que le client puisse continuer à interagir avec le porgramme sans devoir attendre la fin de la requete
+            #utilise un thread pour que le client puisse continuer à interagir avec le porgramme
+            # sans devoir attendre la fin de la requete
             thread = threading.Thread(target=do_new_task_thread, args=(arg,), daemon=True)
             thread.start()
         print(L_red('Veuillez ne pas utiliser de \' dans votre commande.'))
 
-    def do_remove(self, arg):
-        """ Crée le thread qui : supprime une tache de la DB à partir de son id """
+    def do_remove(self, arg): # pylint: disable=unused-argument
+        """
+        Crée le thread qui : supprime une tache de la DB à partir de son id
+        """
         def do_remove_thread(arg_thread):
-            """ Thread qui : supprime une tache de la DB à partir de son id """
+            """
+            Thread qui : supprime une tache de la DB à partir de son id
+            """
 
             #ouvre la connection de socket
             self.open_connection
@@ -218,56 +267,69 @@ class Client(cmd.Cmd):
             self.end_connection
 
         if re.search(r"[']", arg) is None :
-            # utilise un thread pour que le client puisse continuer à interagir avec le porgramme sans devoir attendre la fin de la requete
+            #Utilise un thread pour que le client puisse continuer à interagir avec le porgramme
+            # sans devoir attendre la fin de la requete
             thread = threading.Thread(target=do_remove_thread, args=(arg,), daemon=True)
             thread.start()
 
         print(L_red('Veuillez ne pas utiliser de \' dans votre commande.'))
 
 
-    def do_end_db(self, arg):
-        """ Crée le thread qui : dit à la DB de s'éteindre """
+    def do_end_db(self, arg): # pylint: disable=unused-argument
+        """
+        Crée le thread qui : dit à la DB de s'éteindre
+        """
 
         def do_end_db_thread():
-            """ Thread qui : dit à la DB de s'éteindre """
+            """
+            Thread qui : dit à la DB de s'éteindre
+            """
 
 
             #ouvre la connection de socket
             self.open_connection
 
             #envois la requete sql
-            self.socket.send(f"stop SQLite database".encode())
+            self.socket.send("stop SQLite database".encode())
 
             #ferme la connection du socket
             self.end_connection
 
-        # utilise un thread pour que le client puisse continuer à interagir avec le porgramme sans devoir attendre la fin de la requete
+        #Utilise un thread pour que le client puisse continuer à interagir avec le porgramme
+        # sans devoir attendre la fin de la requete
         thread = threading.Thread(target=do_end_db_thread, daemon=True)
         thread.start()
 
 
-    def do_stop(self, arg):
-        """ Ferme le porgrame interactif du client (en retournant True)"""
+    def do_stop(self, arg): # pylint: disable=unused-argument
+        """
+        Ferme le porgrame interactif du client (en retournant True)
+        """
 
         print("End of client")
         return True
 
-    def do_new_client(self, arg):
-        """ Crée le thread qui : envois un socket à la db demandantde créer un nouveau client """
+    def do_new_client(self, arg): # pylint: disable=unused-argument
+        """
+        Crée le thread qui : envois un socket à la db demandantde créer un nouveau client
+        """
 
         def do_new_client_thread():
-            """ Thread qui : envois un socket à la db demandantde créer un nouveau client """
+            """
+            Thread qui : envois un socket à la db demandantde créer un nouveau client
+            """
 
             #ouvre la connection de socket
             self.open_connection
 
             #envois la requete sql
-            self.socket.send(f"NEW_CLIENT".encode())
+            self.socket.send("NEW_CLIENT".encode())
 
             #ferme la connection du socket
             self.end_connection
 
-        # utilise un thread pour que le client puisse continuer à interagir avec le porgramme sans devoir attendre la fin de la requete
+        #Utilise un thread pour que le client puisse continuer à interagir avec le porgramme
+        # sans devoir attendre la fin de la requete
         thread = threading.Thread(target=do_new_client_thread, daemon=True)
         thread.start()
 

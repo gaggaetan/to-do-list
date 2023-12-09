@@ -10,9 +10,10 @@ from sqlite3 import Error
 import os
 import subprocess
 import threading
+import socket
 
 
-class To_do_list_DB:
+class To_do_list_db:
     """ Class pour la DB """
     def __init__(self, db_file: str):
         """ Initialise les variables de la DB """
@@ -67,7 +68,6 @@ class To_do_list_DB:
 
         self.delete_all_table_in_db()
         self.create_all_table_in_db()
-        pass
 
     def execute_sql_insert(self, query):
         """ Execute la requete SQL INSERT dans la DB et retourne id de l'auto incrémentation dans la DB """
@@ -91,10 +91,10 @@ class To_do_list_DB:
             finally:
                 #commit l'instruction SQL
                 conn.commit()
-                pass
 
         except Error as e:
             print(e)
+            return None
         finally:
             if conn:
                 #ferme la connection avec la DB
@@ -118,6 +118,7 @@ class To_do_list_DB:
 
         except Error as e:
             print(e)
+            return None
         finally:
             if conn:
                 # ferme la connection avec la DB
@@ -148,36 +149,35 @@ class To_do_list_DB:
     def new_clients(self, nbr_new_clients):
         """ Crée un certain nombre de nouveau client dans des nouvelle ligne de commande (cmd) """
 
-        for i in range(int(nbr_new_clients)):
+        for _ in range(int(nbr_new_clients)):
 
             # Chemin absolu vers le script client.py
             client_script_path = os.path.abspath("client.py")
 
             #Lancer un nouveau terminal avec le script client.py qui va créer un nouveau client
-            subprocess.run(["start", "cmd", "/k", "python", client_script_path] + [f"{15600 + self.nbr_client}"],shell=True)
+            subprocess.run(["start", "cmd", "/k", "python", client_script_path] + [f"{15600 + self.nbr_client}"],shell=True, check=True)
             self.nbr_client += 1
 
     def update_client_new_task(self):
         """ Envois une requete à tout les clients pour prévenir  qu'un nouvelle tache à été ajouter à la DB """
 
-        import socket
+        def update_client_end_db_thread(index):
+            try:
+                hote = "localhost"
+                port = 15600 + index
 
-        #envois une requete sur tout les port ou les clients sont à l'écoute
+                server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                server_socket.connect((hote, port))
+                server_socket.send("update".encode())
+                server_socket.close()
+            except:
+                pass
+
+        # Envoie une requête sur tous les ports où les clients sont à l'écoute
         for i in range(self.nbr_client):
-            def update_client_new_task_thread():
-                try:
-                    hote = "localhost"
-                    port = 15600 + i
 
-                    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    server_socket.connect((hote, port))
-                    server_socket.send(f"update".encode())
-                    server_socket.close()
-                except:
-                    pass
-
-            # utilise un thread pour éviter que le porgramme pricipale doivent attendre la fin des socket => et peut donc causer des bug
-            thread = threading.Thread(target=update_client_new_task_thread, daemon=True)
+            # Utilise un thread pour éviter que le programme principal doive attendre la fin des sockets
+            thread = threading.Thread(target=update_client_end_db_thread, args=(i,), daemon=True)
             thread.start()
 
 
@@ -185,23 +185,21 @@ class To_do_list_DB:
     def update_client_end_db(self):
         """ Envois une requete à tout les clients pour prévenir que la DB à été arrêter """
 
+        def update_client_end_db_thread(index):
+            try:
+                hote = "localhost"
+                port = 15600 + index
 
-        import socket
+                server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                server_socket.connect((hote, port))
+                server_socket.send("update".encode())
+                server_socket.close()
+            except:
+                pass
 
-        # envois une requete sur tout les port ou les clients sont à l'écoute
+        # Envoie une requête sur tous les ports où les clients sont à l'écoute
         for i in range(self.nbr_client):
-            def update_client_end_db_thread():
-                try:
-                    hote = "localhost"
-                    port = 15600 + i
 
-                    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    server_socket.connect((hote, port))
-                    server_socket.send(f"update".encode())
-                    server_socket.close()
-                except:
-                    pass
-
-            # utilise un thread pour éviter que le porgramme pricipale doivent attendre la fin des socket => et peut donc causer des bug
-            thread = threading.Thread(target=update_client_end_db_thread, daemon=True)
+            # Utilise un thread pour éviter que le programme principal doive attendre la fin des sockets
+            thread = threading.Thread(target=update_client_end_db_thread, args=(i,), daemon=True)
             thread.start()
