@@ -1,3 +1,9 @@
+"""
+Ce fichier contient la class client.
+
+Elle permet de faire toutes les actions qu'un client doit s'avoir faire
+"""
+
 import cmd
 import socket
 import threading

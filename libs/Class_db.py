@@ -1,3 +1,10 @@
+"""
+Ce fichier contient la class To_do_list_DB.
+
+Elle permet de de lancer toutes les action que la DB doit faire,de la création
+à la mise à jour de celle ci
+"""
+
 import sqlite3
 from sqlite3 import Error
 import os

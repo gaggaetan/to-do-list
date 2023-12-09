@@ -1,3 +1,8 @@
+"""
+Ce fichier permet de créer un client et le jouer si appelé.
+
+"""
+
 import sys
 from libs.Class_client import Client
 

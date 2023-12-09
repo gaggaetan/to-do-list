@@ -1,7 +1,15 @@
+"""
+Ceci est le module principal de l'application To-do List.
+
+Il permet de lancer la DB et ses clients si demandé
+"""
+
 import platform
 import socket
 import re
-from libs.Class_db import *
+import subprocess
+
+from libs.Class_db import To_do_list_DB
 
 if __name__ == '__main__':
     #initialise le nbr de client besoin
@@ -15,13 +23,13 @@ if __name__ == '__main__':
 
     #clear cmd
     if platform.system() == 'Windows':
-        subprocess.run("cls", shell=True)
+        subprocess.run("cls", shell=True, check=True)
     else:
-        subprocess.run("clear", shell=True)
+        subprocess.run("clear", shell=True, check=True)
 
 
     #initialise la db et les clients
-    db = To_do_list_DB("DB\pythonsqlite.db")
+    db = To_do_list_DB(r"DB\pythonsqlite.db")
     db.new_clients(nbr_client)
 
     #initialise l'écoute des client
@@ -32,7 +40,7 @@ if __name__ == '__main__':
     #écoute le port sans fin
     while True:
         client, address = socket.accept()
-        print("{} est connecté".format(address))
+        print(f"{} est connecté".format(address))
 
         response = client.recv(100000).decode()
 
@@ -62,12 +70,13 @@ if __name__ == '__main__':
 
         #suprimer quelque chose de la db
         elif response.split(" ")[0] == "DELETE":
-            result = db.execute_sql_delete(response)
+            db.execute_sql_delete(response)
             db.update_client_new_task()
 
         #pas une requete connue
         else:
-            print(f"Une requete SQL à été fait avec autre chose que INSERT/SELECT/DELETE, la voici :\n{response}")
+            print(f"Une requete SQL à été fait avec autre chose que INSERT/SELECT/DELETE, "
+                  f"la voici :\n{response}")
 
     print("close")
     client.close()
