@@ -14,17 +14,29 @@ import re
 from colorama import Fore, Style, init
 
 
-#lambda pour se faciler la tache des colerma
-def L_bright(value):
+
+def l_bright(value):
+    """
+    Met le texte en lumineux
+    """
     return f"{Style.BRIGHT}{value}{Style.NORMAL}"
 
-def L_cyan(value):
+def l_cyan(value):
+    """
+    Met le texte avec la couleur cyan
+    """
     return f"{Fore.CYAN}{value}{Style.RESET_ALL}"
 
-def L_red(value):
+def l_red(value):
+    """
+    Met le texte avec la couleur rouge
+    """
     return f"{Fore.RED}{value}{Style.RESET_ALL}"
 
-def L_underline(value):
+def l_underline(value):
+    """
+    Souligne le texte
+    """
     return f"\033[4m{value}\033[0m"
 
 
@@ -47,6 +59,7 @@ class Client(cmd.Cmd):
         """
 
         super().__init__()
+        self.socket = None
         self.pers_id = None
 
         #récupere le nom du client
@@ -65,9 +78,9 @@ class Client(cmd.Cmd):
 
             #afficher les erreurs de nom
             if name_validation_special_characters is not None :
-                print(L_red('Veuillez écrire votre nom et prenom sans aucun caractère spéciaux !'))
+                print(l_red('Veuillez écrire votre nom et prenom sans aucun caractère spéciaux !'))
             if len(name_validation_one_space_at_least) == 0 :
-                print(L_red('Veuillez écrire votre nom et prenom avec un espace entre les deux !'))
+                print(l_red('Veuillez écrire votre nom et prenom avec un espace entre les deux !'))
 
             self.client_name = input("Veuillez réintroduite votre nom & prenom :")
             name_validation_special_characters = re.search(r'["\'!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]',
@@ -96,7 +109,7 @@ class Client(cmd.Cmd):
 
     # ------------- conectiion/déconection -------------
 
-    @property
+
     def open_connection(self):
         """
         Initialise la connection vers le main
@@ -109,7 +122,7 @@ class Client(cmd.Cmd):
         self.socket.connect((hote, port))
         pass
 
-    @property
+
     def end_connection(self):
         """
         Ferme la connection vers le main
@@ -125,7 +138,7 @@ class Client(cmd.Cmd):
         """
         
         #ouvre la connection de socket
-        self.open_connection
+        self.open_connection()
         
         #envois la requete sql pour ajouter le client dans la DB
         self.socket.send(f"INSERT INTO personnes(personnes) VALUES('{self.client_name}')".encode())
@@ -134,7 +147,7 @@ class Client(cmd.Cmd):
         self.pers_id = self.socket.recv(255).decode()
 
         #ferme la connection de socket
-        self.end_connection
+        self.end_connection()
 
     @property
     def show_to_do_list(self):
@@ -143,7 +156,7 @@ class Client(cmd.Cmd):
         """
 
         #ouvre la connection de socket
-        self.open_connection
+        self.open_connection()
 
         #envois la requete sql
         self.socket.send("SELECT t1.to_do, t2.personnes, t1.id FROM to_do_list as t1 join"
@@ -153,14 +166,14 @@ class Client(cmd.Cmd):
 
         print("Vous etes bien connecter à la base de données 'To-do list',"
               "vous pouvez executer ces commandes pour interagir avec la base de donnes :\n"
-              f"    - {L_cyan('new_task arg1')}       => pour ajouter une nouvelle tache.\n"
-              f"    - {L_cyan('remove arg1')}         => pour elever une tache avec son id\n"
-              f"    - {L_cyan('stop')}                => pour arreter le programme.\n"
-              f"    - {L_cyan('new_client')}          => pour avoir un nouveau client.\n"
-              f"    - {L_cyan('end_db')}              => pour arreter la database.\n")
+              f"    - {l_cyan('new_task arg1')}       => pour ajouter une nouvelle tache.\n"
+              f"    - {l_cyan('remove arg1')}         => pour elever une tache avec son id\n"
+              f"    - {l_cyan('stop')}                => pour arreter le programme.\n"
+              f"    - {l_cyan('new_client')}          => pour avoir un nouveau client.\n"
+              f"    - {l_cyan('end_db')}              => pour arreter la database.\n")
 
         #print les taches qu ela db contient suite à la réponse de la requete
-        print(L_underline("Votre liste de taches :"))
+        print(l_underline("Votre liste de taches :"))
         response_str = self.socket.recv(100000).decode()
         response_tab = eval(response_str)
         for i in range(len(response_tab)):
@@ -168,7 +181,7 @@ class Client(cmd.Cmd):
                   f"(task id = {response_tab[i][2]})")
         
         #ferme la connection du socket
-        self.end_connection
+        self.end_connection()
 
     @property
     def clear_screen(self):
@@ -201,7 +214,7 @@ class Client(cmd.Cmd):
 
             #écoute le port sans fin
             while True:
-                client, address = server_socket.accept()
+                client, _ = server_socket.accept()
 
                 response = client.recv(100000).decode()
 
@@ -232,21 +245,21 @@ class Client(cmd.Cmd):
             """
             
             #ouvre la connection de socket
-            self.open_connection
+            self.open_connection()
 
             #envois la requete sql
             self.socket.send(f"INSERT INTO to_do_list(to_do, pers_id) VALUES('{arg_thread}',"
                              f"'{self.pers_id}')".encode())
 
             #ferme la connection du socket
-            self.end_connection
+            self.end_connection()
 
         if re.search(r"[']", arg) is None :
             #utilise un thread pour que le client puisse continuer à interagir avec le porgramme
             # sans devoir attendre la fin de la requete
             thread = threading.Thread(target=do_new_task_thread, args=(arg,), daemon=True)
             thread.start()
-        print(L_red('Veuillez ne pas utiliser de \' dans votre commande.'))
+        print(l_red('Veuillez ne pas utiliser de \' dans votre commande.'))
 
     def do_remove(self, arg): # pylint: disable=unused-argument
         """
@@ -258,13 +271,13 @@ class Client(cmd.Cmd):
             """
 
             #ouvre la connection de socket
-            self.open_connection
+            self.open_connection()
 
             #envois la requete sql
             self.socket.send(f"DELETE FROM to_do_list as t1 WHERE t1.id = {arg_thread}".encode())
 
             #ferme la connection du socket
-            self.end_connection
+            self.end_connection()
 
         if re.search(r"[']", arg) is None :
             #Utilise un thread pour que le client puisse continuer à interagir avec le porgramme
@@ -272,7 +285,7 @@ class Client(cmd.Cmd):
             thread = threading.Thread(target=do_remove_thread, args=(arg,), daemon=True)
             thread.start()
 
-        print(L_red('Veuillez ne pas utiliser de \' dans votre commande.'))
+        print(l_red('Veuillez ne pas utiliser de \' dans votre commande.'))
 
 
     def do_end_db(self, arg): # pylint: disable=unused-argument
@@ -287,13 +300,13 @@ class Client(cmd.Cmd):
 
 
             #ouvre la connection de socket
-            self.open_connection
+            self.open_connection()
 
             #envois la requete sql
             self.socket.send("stop SQLite database".encode())
 
             #ferme la connection du socket
-            self.end_connection
+            self.end_connection()
 
         #Utilise un thread pour que le client puisse continuer à interagir avec le porgramme
         # sans devoir attendre la fin de la requete
@@ -320,13 +333,13 @@ class Client(cmd.Cmd):
             """
 
             #ouvre la connection de socket
-            self.open_connection
+            self.open_connection()
 
             #envois la requete sql
             self.socket.send("NEW_CLIENT".encode())
 
             #ferme la connection du socket
-            self.end_connection
+            self.end_connection()
 
         #Utilise un thread pour que le client puisse continuer à interagir avec le porgramme
         # sans devoir attendre la fin de la requete

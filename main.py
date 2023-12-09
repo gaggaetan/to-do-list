@@ -9,7 +9,7 @@ import socket
 import re
 import subprocess
 
-from libs.class_db import To_do_list_db
+from libs.class_db import ToDoListDB
 
 if __name__ == '__main__':
     #initialise le nbr de client besoin
@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
 
     #initialise la db et les clients
-    db = To_do_list_db(r"DB\pythonsqlite.db")
+    db = ToDoListDB(r"DB\pythonsqlite.db")
     db.new_clients(nbr_client)
 
     #initialise l'écoute des client
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     #écoute le port sans fin
     while True:
         client, address = socket.accept()
-        print("{} est connecté".format(address))
+        print(f"{address} est connecté")
 
         response = client.recv(100000).decode()
 
