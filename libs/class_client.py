@@ -94,10 +94,10 @@ class Client(cmd.Cmd):
 
 
         #écouter la db pour savoir q'il ya une un changement avec le numero de port
-        self.listen_to_change_in_db
+        self.listen_to_change_in_db()
 
         #création de la personne dans la base de données
-        self.create_client
+        self.create_client()
 
     def emptyline(self):
         """
@@ -105,7 +105,6 @@ class Client(cmd.Cmd):
         """
 
         print("Veuillez introduire quelque chose :")
-        return None
 
     # ------------- conectiion/déconection -------------
 
@@ -120,7 +119,6 @@ class Client(cmd.Cmd):
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((hote, port))
-        pass
 
 
     def end_connection(self):
@@ -131,12 +129,12 @@ class Client(cmd.Cmd):
         self.socket.close()
 
     # ------------- utilities -------------
-    @property
+
     def create_client(self):
         """
         Crée le client dans le DB
         """
-        
+
         #ouvre la connection de socket
         self.open_connection()
         
@@ -162,7 +160,7 @@ class Client(cmd.Cmd):
         self.socket.send("SELECT t1.to_do, t2.personnes, t1.id FROM to_do_list as t1 join"
                          " personnes as t2 on t1.pers_id = t2.pers_id".encode())
 
-        self.clear_screen
+        self.clear_screen()
 
         print("Vous etes bien connecter à la base de données 'To-do list',"
               "vous pouvez executer ces commandes pour interagir avec la base de donnes :\n"
@@ -183,7 +181,7 @@ class Client(cmd.Cmd):
         #ferme la connection du socket
         self.end_connection()
 
-    @property
+
     def clear_screen(self):
         """
         Clear the cmd screen
@@ -195,7 +193,6 @@ class Client(cmd.Cmd):
             subprocess.run("clear", shell=True, check=True)
 
     # ------------- écoute le changement dans la DB -------------
-    @property
     def listen_to_change_in_db(self):
         """
         Crée le thread qui : écoute le port sur lequel la base de données pourrait envoyer un signal
@@ -224,11 +221,12 @@ class Client(cmd.Cmd):
 
                 #si un client à éteint la db, cela ferme les socket du client et préveint le client
                 if response == "end_db":
-                    server_socket.close
+                    server_socket.close()
                     print("the db has shut down")
 
         #utilise un thread pour éviter que le client ne puisse plus interagir avec
-        #le porgramme interactif pricipal (car quand on écoute sur un port on ne peut plus rien faire d'autre du au while)
+        #le porgramme interactif pricipal (car quand on écoute sur un port on ne peut plus rien
+        # faire d'autre du au while)
         thread = threading.Thread(target=listen_to_change_in_db_thread, daemon=True)
         thread.start()
 

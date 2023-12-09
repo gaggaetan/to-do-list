@@ -1,8 +1,8 @@
 """
-Ce fichier contient la class To_do_list_DB.
+Ce fichier contient la class ToDoListDB.
 
-Elle permet de de lancer toutes les action que la DB doit faire,de la création
-à la mise à jour de celle ci
+Elle permet de de lancer toutes les action que la DB doit faire,
+de la création à la mise à jour de celle ci
 """
 
 import sqlite3
