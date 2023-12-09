@@ -193,7 +193,7 @@ class ToDoListDB:
                 server_socket.connect((hote, port))
                 server_socket.send("update".encode())
                 server_socket.close()
-            except:
+            except socket.error:
                 pass
 
         #envoie une requête sur tous les ports où les clients sont à l'écoute
@@ -220,7 +220,7 @@ class ToDoListDB:
                 server_socket.connect((hote, port))
                 server_socket.send("update".encode())
                 server_socket.close()
-            except:
+            except socket.error:
                 pass
 
         #envoie une requête sur tous les ports où les clients sont à l'écoute

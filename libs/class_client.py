@@ -10,6 +10,7 @@ import threading
 import subprocess
 import platform
 import re
+import ast
 
 from colorama import Fore, Style, init
 
@@ -129,7 +130,6 @@ class Client(cmd.Cmd):
         self.socket.close()
 
     # ------------- utilities -------------
-
     def create_client(self):
         """
         Crée le client dans le DB
@@ -137,7 +137,6 @@ class Client(cmd.Cmd):
 
         #ouvre la connection de socket
         self.open_connection()
-        
         #envois la requete sql pour ajouter le client dans la DB
         self.socket.send(f"INSERT INTO personnes(personnes) VALUES('{self.client_name}')".encode())
 
@@ -173,14 +172,12 @@ class Client(cmd.Cmd):
         #print les taches qu ela db contient suite à la réponse de la requete
         print(l_underline("Votre liste de taches :"))
         response_str = self.socket.recv(100000).decode()
-        response_tab = eval(response_str)
-        for i in range(len(response_tab)):
-            print(f"{i + 1}) {response_tab[i][0]} BY {response_tab[i][1]} "
-                  f"(task id = {response_tab[i][2]})")
-        
+        response_tab = ast.literal_eval(response_str)
+        for i, task_info in enumerate(response_tab, start=1):
+            print(f"{i}) {task_info[0]} BY {task_info[1]} (task id = {task_info[2]})")
+
         #ferme la connection du socket
         self.end_connection()
-
 
     def clear_screen(self):
         """
@@ -221,7 +218,6 @@ class Client(cmd.Cmd):
 
                 #si un client à éteint la db, cela ferme les socket du client et préveint le client
                 if response == "end_db":
-                    server_socket.close()
                     print("the db has shut down")
 
         #utilise un thread pour éviter que le client ne puisse plus interagir avec
@@ -244,7 +240,6 @@ class Client(cmd.Cmd):
             
             #ouvre la connection de socket
             self.open_connection()
-
             #envois la requete sql
             self.socket.send(f"INSERT INTO to_do_list(to_do, pers_id) VALUES('{arg_thread}',"
                              f"'{self.pers_id}')".encode())
