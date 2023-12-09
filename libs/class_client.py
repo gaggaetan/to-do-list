@@ -2,7 +2,10 @@
 Ce fichier contient la class client.
 
 Elle permet de faire toutes les actions qu'un client doit s'avoir faire
+
+# pylint: disable=C0103
 """
+
 
 import cmd
 import socket
@@ -146,7 +149,7 @@ class Client(cmd.Cmd):
         #ferme la connection de socket
         self.end_connection()
 
-    @property
+
     def show_to_do_list(self):
         """
         Crée le client dans le DB
@@ -214,7 +217,7 @@ class Client(cmd.Cmd):
 
                 #en cas de update de la liste de taches, on l'update sur l'interface client
                 if response == "update":
-                    self.show_to_do_list
+                    self.show_to_do_list()
 
                 #si un client à éteint la db, cela ferme les socket du client et préveint le client
                 if response == "end_db":
@@ -237,7 +240,6 @@ class Client(cmd.Cmd):
             """
             Thread qui : envois une nouvelle taches que la DB doit rajouter
             """
-            
             #ouvre la connection de socket
             self.open_connection()
             #envois la requete sql

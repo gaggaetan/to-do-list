@@ -3,7 +3,10 @@ Ce fichier contient la class ToDoListDB.
 
 Elle permet de de lancer toutes les action que la DB doit faire,
 de la création à la mise à jour de celle ci
+
+# pylint: disable=C0103
 """
+
 
 import sqlite3
 from sqlite3 import Error
