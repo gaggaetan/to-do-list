@@ -216,7 +216,6 @@ class Client(cmd.Cmd):
                 #en cas de update de la liste de taches, on l'update sur l'interface client
                 if response == "update":
                     self.show_to_do_list()
-                    print('a')
 
                 #si un client à éteint la db, cela ferme les socket du client et préveint le client
                 if response == "end_db":
