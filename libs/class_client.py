@@ -268,7 +268,7 @@ class Client(cmd.Cmd):
             self.open_connection()
 
             #envois la requete sql
-            self.socket.send(f"DELETE FROM to_do_list as t1 WHERE t1.id = {arg_thread}".encode())
+            self.socket.send(f"DELETE FROM to_do_list WHERE id = {arg_thread}".encode())
 
             #ferme la connection du socket
             self.end_connection()

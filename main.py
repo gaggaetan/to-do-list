@@ -31,7 +31,7 @@ if __name__ == '__main__':
     #initialise la db et les clients
     db = ToDoListDB(r"DB\pythonsqlite.db")
     db.new_clients(nbr_client)
-    #db.reset_db()
+    db.reset_db()
 
     #initialise l'écoute des clients
     socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
