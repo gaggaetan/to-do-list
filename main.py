@@ -31,6 +31,7 @@ if __name__ == '__main__':
     #initialise la db et les clients
     db = ToDoListDB(r"DB\pythonsqlite.db")
     db.new_clients(nbr_client)
+    db.reset_db()
 
     #initialise l'écoute des clients
     socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -49,7 +50,6 @@ if __name__ == '__main__':
             socket.close()
             print("close db")
             db.update_client_end_db()
-            print("close clients")
             break
 
         #selectione quelque chose dans la db pour ensuite l'affichier chez le client

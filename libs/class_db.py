@@ -186,7 +186,7 @@ class ToDoListDB:
         été ajouter à la DB
         """
 
-        def update_client_end_db_thread(index):
+        def update_client_new_task_thread(index):
             try:
                 hote = "localhost"
                 port = 15600 + index
@@ -203,7 +203,7 @@ class ToDoListDB:
 
             #utilise un thread pour éviter que le programme principal doive attendre
             # la fin des sockets
-            thread = threading.Thread(target=update_client_end_db_thread, args=(i,), daemon=True)
+            thread = threading.Thread(target=update_client_new_task_thread, args=(i,), daemon=True)
             thread.start()
 
 
@@ -220,15 +220,15 @@ class ToDoListDB:
 
                 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 server_socket.connect((hote, port))
-                server_socket.send("update".encode())
+                server_socket.send("end_db".encode())
                 server_socket.close()
             except socket.error:
                 pass
 
-        #envoie une requête sur tous les ports où les clients sont à l'écoute
-        for i in range(self.nbr_client):
 
-            #utilise un thread pour éviter que le programme principal doive attendre
+        # envoie une requête sur tous les ports où les clients sont à l'écoute
+        for i in range(self.nbr_client):
+            # utilise un thread pour éviter que le programme principal doive attendre
             # la fin des sockets
-            thread = threading.Thread(target=update_client_end_db_thread, args=(i,), daemon=True)
+            thread = threading.Thread(target=update_client_end_db_thread, args=(i,))
             thread.start()
