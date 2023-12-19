@@ -29,7 +29,8 @@ class ToDoListDB:
 
 
         logging.basicConfig(filename=r'logs\db_logs.log', level=logging.INFO,
-                            format='%(asctime)s %(levelname)s : %(message)s',datefmt='%m/%d/%Y %I:%M:%S %p')
+                            format='%(asctime)s %(levelname)s : %(message)s',
+                            datefmt='%m/%d/%Y %I:%M:%S %p')
         logging.info('The DB has started')
 
     def delete_all_table_in_db(self):
@@ -48,7 +49,7 @@ class ToDoListDB:
 
             logging.info('The tables of the DB have been drop correctly')
         except Error as e:
-            logging.warning(f'The tables of the DB have not been drop correctly : %s', e)
+            logging.warning('The tables of the DB have not been drop correctly : %s', e)
         finally:
             if conn:
                 conn.close()
@@ -76,7 +77,7 @@ class ToDoListDB:
                          ");")
             logging.info('The tables of the DB have been created correctly')
         except Error as e:
-            logging.warning(f'The table of the DB have not been created correctly : %s', e)
+            logging.warning('The table of the DB have not been created correctly : %s', e)
         finally:
             if conn:
                 #ferme la connection avec la DB
@@ -121,7 +122,7 @@ class ToDoListDB:
 
 
         except Error as e:
-            logging.error(f'The insert statement in the DB  have fail : %s', e)
+            logging.error('The insert statement in the DB  have fail : %s', e)
             return None
         finally:
             if conn:
@@ -150,7 +151,7 @@ class ToDoListDB:
 
 
         except Error as e:
-            logging.error(f'The select statement in the DB  have fail : %s', e)
+            logging.error('The select statement in the DB  have fail : %s', e)
             return None
         finally:
             if conn:
@@ -177,7 +178,7 @@ class ToDoListDB:
             logging.info('The delete statement in the DB have workt')
 
         except Error as e:
-            logging.error(f'The delete statement in the DB  have fail : %s', e)
+            logging.error('The delete statement in the DB  have fail : %s', e)
         finally:
             if conn:
                 #ferme la connection avec la DB
