@@ -48,7 +48,7 @@ class ToDoListDB:
 
             logging.info('The tables of the DB have been drop correctly')
         except Error as e:
-            logging.warning(f'The tables of the DB have not been drop correctly : %s', e')
+            logging.warning(f'The tables of the DB have not been drop correctly : %s', e)
         finally:
             if conn:
                 conn.close()
@@ -76,7 +76,7 @@ class ToDoListDB:
                          ");")
             logging.info('The tables of the DB have been created correctly')
         except Error as e:
-            logging.warning(f'The table of the DB have not been created correctly : %s', e')
+            logging.warning(f'The table of the DB have not been created correctly : %s', e)
         finally:
             if conn:
                 #ferme la connection avec la DB
@@ -106,6 +106,8 @@ class ToDoListDB:
             #execute le code SQL dans la DB
             cur.execute(query)
 
+            logging.info('The insert statement in the DB  have workt')
+
             #teste si il y a un id autoincrément avec "cur.lastrowid" pour le retourner apres,
             # aussi non il passe à la suite
             try:
@@ -117,7 +119,6 @@ class ToDoListDB:
                 #commit l'instruction SQL
                 conn.commit()
 
-            logging.info('The insert statement in the DB  have workt')
 
         except Error as e:
             logging.error(f'The insert statement in the DB  have fail : %s', e)
