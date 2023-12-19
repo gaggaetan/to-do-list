@@ -28,8 +28,8 @@ class ToDoListDB:
         self.nbr_client = 0 #nombre de client qui sont connectrer à la DB
 
 
-        logging.basicConfig(filename='logs\db_logs.log', level=logging.INFO,
-                            format='%(asctime)s %(levelname)s : %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+        logging.basicConfig(filename=r'logs\db_logs.log', level=logging.INFO,
+                            format='%(asctime)s %(levelname)s : %(message)s',datefmt='%m/%d/%Y %I:%M:%S %p')
         logging.info('The DB has started')
 
     def delete_all_table_in_db(self):
@@ -48,7 +48,7 @@ class ToDoListDB:
 
             logging.info('The tables of the DB have been drop correctly')
         except Error as e:
-            logging.warning(f'The tables of the DB have not been drop correctly: {e}')
+            logging.warning(f'The tables of the DB have not been drop correctly : %s', e')
         finally:
             if conn:
                 conn.close()
@@ -76,7 +76,7 @@ class ToDoListDB:
                          ");")
             logging.info('The tables of the DB have been created correctly')
         except Error as e:
-            logging.warning(f'The table of the DB have not been created correctly : {e}')
+            logging.warning(f'The table of the DB have not been created correctly : %s', e')
         finally:
             if conn:
                 #ferme la connection avec la DB
@@ -120,7 +120,7 @@ class ToDoListDB:
             logging.info('The insert statement in the DB  have workt')
 
         except Error as e:
-            logging.error(f'The insert statement in the DB  have fail : {e}')
+            logging.error(f'The insert statement in the DB  have fail : %s', e)
             return None
         finally:
             if conn:
@@ -149,7 +149,7 @@ class ToDoListDB:
 
 
         except Error as e:
-            logging.error(f'The select statement in the DB  have fail : {e}')
+            logging.error(f'The select statement in the DB  have fail : %s', e)
             return None
         finally:
             if conn:
@@ -176,7 +176,7 @@ class ToDoListDB:
             logging.info('The delete statement in the DB have workt')
 
         except Error as e:
-            logging.error(f'The delete statement in the DB  have fail : {e}')
+            logging.error(f'The delete statement in the DB  have fail : %s', e)
         finally:
             if conn:
                 #ferme la connection avec la DB
@@ -196,7 +196,8 @@ class ToDoListDB:
             subprocess.run(["start", "cmd", "/k", "python", client_script_path] +
                            [f"{15600 + self.nbr_client}"],shell=True, check=True)
 
-            logging.info(f'A new client have been add : N°{self.nbr_client}')
+            logging.info('A new client has been added: N°%s', self.nbr_client)
+
 
             self.nbr_client += 1
 
@@ -218,8 +219,8 @@ class ToDoListDB:
                 server_socket.send("update".encode())
                 server_socket.close()
             except socket.error:
-                logging.debug('A client may have not receiv the update of the DB or he is already gone')
-                pass
+                logging.debug('A client may have not receiv the update of the DB '
+                              'or he is already gone')
 
         #envoie une requête sur tous les ports où les clients sont à l'écoute
         for i in range(self.nbr_client):
@@ -248,8 +249,8 @@ class ToDoListDB:
                 server_socket.send("end_db".encode())
                 server_socket.close()
             except socket.error:
-                logging.debug('A client may have not receiv that the DB has end or he is already gone')
-                pass
+                logging.debug('A client may have not receiv that the DB has end '
+                              'or he is already gone')
 
 
         # envoie une requête sur tous les ports où les clients sont à l'écoute
