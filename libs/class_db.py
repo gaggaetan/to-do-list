@@ -13,18 +13,24 @@ import os
 import subprocess
 import threading
 import socket
-
+import logging
 
 class ToDoListDB:
     """
     Class pour la DB
     """
+
     def __init__(self, db_file: str):
         """
         Initialise les variables de la DB
         """
         self._db_file = db_file #dosier avec la DB
         self.nbr_client = 0 #nombre de client qui sont connectrer à la DB
+
+
+        logging.basicConfig(filename='logs\db_logs.log', level=logging.INFO,
+                            format='%(asctime)s %(levelname)s : %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+        logging.info('The DB has started')
 
     def delete_all_table_in_db(self):
         """
@@ -39,8 +45,10 @@ class ToDoListDB:
             #suprimer les 2 tables
             conn.execute("DROP TABLE to_do_list")
             conn.execute("DROP TABLE personnes")
+
+            logging.info('The tables of the DB have been drop correctly')
         except Error as e:
-            print(e)
+            logging.warning(f'The tables of the DB have not been drop correctly: {e}')
         finally:
             if conn:
                 conn.close()
@@ -66,8 +74,9 @@ class ToDoListDB:
                          "personnes TEXT NOT NULL,"
                          "FOREIGN KEY (pers_id) REFERENCES to_do_list(pers_id)"
                          ");")
+            logging.info('The tables of the DB have been created correctly')
         except Error as e:
-            print(e)
+            logging.warning(f'The table of the DB have not been created correctly : {e}')
         finally:
             if conn:
                 #ferme la connection avec la DB
@@ -80,6 +89,7 @@ class ToDoListDB:
 
         self.delete_all_table_in_db()
         self.create_all_table_in_db()
+        logging.info('The information in the DB have been reset correctly')
 
     def execute_sql_insert(self, query):
         """
@@ -107,8 +117,10 @@ class ToDoListDB:
                 #commit l'instruction SQL
                 conn.commit()
 
+            logging.info('The insert statement in the DB  have workt')
+
         except Error as e:
-            print(e)
+            logging.error(f'The insert statement in the DB  have fail : {e}')
             return None
         finally:
             if conn:
@@ -130,11 +142,14 @@ class ToDoListDB:
             #execute le code SQL dans la DB
             cur.execute(query)
 
+            logging.info('The select statement in the DB  have workt')
+
             #retourne le résultat de la requete SLQ select
             return cur.fetchall()
 
+
         except Error as e:
-            print(e)
+            logging.error(f'The select statement in the DB  have fail : {e}')
             return None
         finally:
             if conn:
@@ -158,8 +173,10 @@ class ToDoListDB:
             #commit l'instruction SQL
             conn.commit()
 
+            logging.info('The delete statement in the DB have workt')
+
         except Error as e:
-            print(e)
+            logging.error(f'The delete statement in the DB  have fail : {e}')
         finally:
             if conn:
                 #ferme la connection avec la DB
@@ -178,7 +195,12 @@ class ToDoListDB:
             #lancer un nouveau terminal avec le script client.py qui va créer un nouveau client
             subprocess.run(["start", "cmd", "/k", "python", client_script_path] +
                            [f"{15600 + self.nbr_client}"],shell=True, check=True)
+
+            logging.info(f'A new client have been add : N°{self.nbr_client}')
+
             self.nbr_client += 1
+
+
 
     def update_client_new_task(self):
         """
@@ -196,6 +218,7 @@ class ToDoListDB:
                 server_socket.send("update".encode())
                 server_socket.close()
             except socket.error:
+                logging.debug('A client may have not receiv the update of the DB or he is already gone')
                 pass
 
         #envoie une requête sur tous les ports où les clients sont à l'écoute
@@ -205,6 +228,8 @@ class ToDoListDB:
             # la fin des sockets
             thread = threading.Thread(target=update_client_new_task_thread, args=(i,), daemon=True)
             thread.start()
+
+        logging.info('All the clients have been notify that the db have be update')
 
 
 
@@ -223,6 +248,7 @@ class ToDoListDB:
                 server_socket.send("end_db".encode())
                 server_socket.close()
             except socket.error:
+                logging.debug('A client may have not receiv that the DB has end or he is already gone')
                 pass
 
 
@@ -232,3 +258,5 @@ class ToDoListDB:
             # la fin des sockets
             thread = threading.Thread(target=update_client_end_db_thread, args=(i,))
             thread.start()
+
+        logging.info('All the clients have been notify that the db has end')
